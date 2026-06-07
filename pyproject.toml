@@ -12,19 +12,22 @@ classifiers = [
     "Environment :: Console",
     "Intended Audience :: End Users/Desktop",
     "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Multimedia :: Sound/Audio :: Speech",
     "Topic :: Utilities",
+    "Typing :: Typed",
 ]
 dependencies = [
     "mlx-whisper>=0.4.2",
-    "yt-dlp>=2025.5.22",
+    "yt-dlp>=2026.3.17",
 ]
 
 [project.urls]
 Repository = "https://github.com/hillfieldhonest/mlx_whisper_yt2srt"
+Issues = "https://github.com/hillfieldhonest/mlx_whisper_yt2srt/issues"
 
 [project.scripts]
 yt2srt = "mlx_whisper_yt2srt.cli:main"

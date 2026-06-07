@@ -6,6 +6,7 @@ from typing import Any
 
 from .config import DEFAULT_MODEL_SIZE, MODEL_REPOS
 from .errors import Yt2SrtError
+from .progress import ProgressCallback, emit_progress
 from .srt import write_srt
 
 
@@ -14,7 +15,10 @@ def generate_srt(
     *,
     model_size: str = DEFAULT_MODEL_SIZE,
     language: str = "auto",
+    progress: ProgressCallback | None = None,
 ) -> Path:
+    """Transcribe an audio file with MLX Whisper and write an SRT file."""
+
     audio_file = audio_file.expanduser().resolve()
     if not audio_file.exists():
         raise Yt2SrtError(f"Audio file not found: {audio_file}")
@@ -24,7 +28,7 @@ def generate_srt(
         allowed = ", ".join(MODEL_REPOS)
         raise Yt2SrtError(f"Unknown model '{model_size}'. Choose one of: {allowed}")
 
-    print(f"Loading MLX Whisper model '{model_repo}'...")
+    emit_progress(progress, f"Loading MLX Whisper model '{model_repo}'...")
 
     transcribe_kwargs: dict[str, Any] = {}
     if language.lower() != "auto":
@@ -32,7 +36,12 @@ def generate_srt(
 
     try:
         import mlx_whisper
+    except ImportError as exc:
+        raise Yt2SrtError(
+            "MLX Whisper could not be imported. Run 'uv sync' to install project dependencies.",
+        ) from exc
 
+    try:
         result = mlx_whisper.transcribe(
             str(audio_file),
             path_or_hf_repo=model_repo,
@@ -48,7 +57,7 @@ def generate_srt(
     except Exception as exc:
         raise Yt2SrtError(f"SRT file generation failed: {exc}") from exc
 
-    print(f"Generated SRT file: {srt_path}")
+    emit_progress(progress, f"Generated SRT file: {srt_path}")
     return srt_path
 
 
@@ -72,6 +81,8 @@ def _extract_segments(result: object) -> Sequence[Mapping[str, Any]]:
 
 
 def unique_srt_path(audio_file: Path, model_size: str) -> Path:
+    """Return a non-conflicting SRT path next to the source audio file."""
+
     base_path = audio_file.with_name(f"{audio_file.stem}_{model_size.lower()}.srt")
     if not base_path.exists():
         return base_path

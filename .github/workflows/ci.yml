@@ -35,4 +35,6 @@ jobs:
       - name: CLI smoke tests
         run: |
           uv run yt2srt --help
+          uv run yt2srt --version
           uv run python -m mlx_whisper_yt2srt --help
+          uv run python -m mlx_whisper_yt2srt --version

@@ -24,6 +24,14 @@ def test_unique_srt_path_adds_counter_when_file_exists(tmp_path):
     assert unique_srt_path(audio_file, "tiny") == tmp_path / "youtube_abc_tiny_03.srt"
 
 
+def test_generate_srt_rejects_unknown_model(tmp_path):
+    audio_file = tmp_path / "audio.mp3"
+    audio_file.write_text("audio", encoding="utf-8")
+
+    with pytest.raises(Yt2SrtError, match="Unknown model 'unknown'"):
+        transcription.generate_srt(audio_file, model_size="unknown")
+
+
 def test_generate_srt_rejects_transcription_without_segments(monkeypatch, tmp_path):
     audio_file = tmp_path / "audio.mp3"
     audio_file.write_text("audio", encoding="utf-8")
@@ -31,6 +39,37 @@ def test_generate_srt_rejects_transcription_without_segments(monkeypatch, tmp_pa
     monkeypatch.setitem(sys.modules, "mlx_whisper", fake_mlx)
 
     with pytest.raises(Yt2SrtError, match="no transcription segments"):
+        transcription.generate_srt(audio_file, model_size="tiny")
+
+
+def test_generate_srt_reports_progress_via_callback(monkeypatch, tmp_path, capsys):
+    audio_file = tmp_path / "audio.mp3"
+    audio_file.write_text("audio", encoding="utf-8")
+    fake_mlx = SimpleNamespace(
+        transcribe=lambda *_args, **_kwargs: {
+            "segments": [{"start": 0, "end": 1, "text": "hello"}],
+        },
+    )
+    monkeypatch.setitem(sys.modules, "mlx_whisper", fake_mlx)
+    events = []
+
+    result = transcription.generate_srt(audio_file, model_size="tiny", progress=events.append)
+
+    captured = capsys.readouterr()
+    assert result == tmp_path / "audio_tiny.srt"
+    assert events == [
+        "Loading MLX Whisper model 'mlx-community/whisper-tiny-mlx'...",
+        f"Generated SRT file: {tmp_path / 'audio_tiny.srt'}",
+    ]
+    assert captured.out == ""
+
+
+def test_generate_srt_reports_import_failure_separately(monkeypatch, tmp_path):
+    audio_file = tmp_path / "audio.mp3"
+    audio_file.write_text("audio", encoding="utf-8")
+    monkeypatch.setitem(sys.modules, "mlx_whisper", None)
+
+    with pytest.raises(Yt2SrtError, match="MLX Whisper could not be imported"):
         transcription.generate_srt(audio_file, model_size="tiny")
 
 
