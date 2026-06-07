@@ -26,6 +26,7 @@ def download_youtube_audio(
     options = {
         "format": "bestaudio/best",
         "hls_use_mpegts": True,
+        "noplaylist": True,
         "outtmpl": str(workspace_dir / "youtube_%(id)s.%(ext)s"),
         "overwrites": True,
         "postprocessors": [
@@ -63,6 +64,9 @@ def download_youtube_audio(
 def _extract_video_id(info: dict[str, Any] | None) -> str:
     if not info:
         raise Yt2SrtError("yt-dlp did not return video metadata.")
+
+    if "entries" in info:
+        raise Yt2SrtError("Playlist URLs are not supported; pass a single video URL.")
 
     video_id = info.get("id")
     if not isinstance(video_id, str) or not video_id.strip():

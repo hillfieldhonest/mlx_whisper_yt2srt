@@ -12,6 +12,7 @@ from .errors import Yt2SrtError
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
+        prog="yt2srt",
         description="Convert a YouTube video to an SRT subtitle file using MLX Whisper.",
     )
     parser.add_argument(

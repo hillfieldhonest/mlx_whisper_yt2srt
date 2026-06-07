@@ -1,3 +1,5 @@
+import subprocess
+import sys
 from pathlib import Path
 
 from mlx_whisper_yt2srt import cli
@@ -45,3 +47,15 @@ def test_main_returns_one_when_conversion_fails(monkeypatch, capsys):
     captured = capsys.readouterr()
     assert exit_code == 1
     assert "Error: download failed" in captured.err
+
+
+def test_module_entrypoint_help_runs():
+    result = subprocess.run(
+        [sys.executable, "-m", "mlx_whisper_yt2srt", "--help"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    assert "Convert a YouTube video to an SRT subtitle file" in result.stdout

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -40,10 +41,34 @@ def generate_srt(
     except Exception as exc:
         raise Yt2SrtError(f"MLX Whisper transcription failed: {exc}") from exc
 
+    segments = _extract_segments(result)
     srt_path = unique_srt_path(audio_file, model_size)
-    write_srt(result["segments"], srt_path)
+    try:
+        write_srt(segments, srt_path)
+    except Exception as exc:
+        raise Yt2SrtError(f"SRT file generation failed: {exc}") from exc
+
     print(f"Generated SRT file: {srt_path}")
     return srt_path
+
+
+def _extract_segments(result: object) -> Sequence[Mapping[str, Any]]:
+    if not isinstance(result, Mapping):
+        raise Yt2SrtError("MLX Whisper returned an invalid transcription result.")
+
+    segments = result.get("segments")
+    if not isinstance(segments, list):
+        raise Yt2SrtError("MLX Whisper returned no transcription segments.")
+
+    for index, segment in enumerate(segments, start=1):
+        if not isinstance(segment, Mapping):
+            raise Yt2SrtError(f"MLX Whisper segment {index} is not an object.")
+        missing_fields = {"start", "end", "text"} - set(segment)
+        if missing_fields:
+            missing = ", ".join(sorted(missing_fields))
+            raise Yt2SrtError(f"MLX Whisper segment {index} is missing: {missing}")
+
+    return segments
 
 
 def unique_srt_path(audio_file: Path, model_size: str) -> Path:

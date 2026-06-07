@@ -8,6 +8,12 @@ on:
 jobs:
   test:
     runs-on: macos-14
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - name: Install uv
@@ -15,7 +21,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: uv sync --dev
       - name: Lint
@@ -24,3 +30,9 @@ jobs:
         run: uv run ruff format --check .
       - name: Tests
         run: uv run pytest
+      - name: Package build
+        run: uv build
+      - name: CLI smoke tests
+        run: |
+          uv run yt2srt --help
+          uv run python -m mlx_whisper_yt2srt --help

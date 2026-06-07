@@ -64,6 +64,7 @@ uv run pytest
 
 - `yt-dlp` is used through its Python API instead of shelling out.
 - The process working directory is never changed during conversion.
+- Playlist URLs are rejected by default; pass a single YouTube video URL.
 - MLX Whisper is imported lazily so `yt2srt --help` works even when Metal is not
   available in the current execution context.
 - Model names are defined once in `src/mlx_whisper_yt2srt/config.py` and reused

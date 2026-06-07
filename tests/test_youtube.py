@@ -1,3 +1,5 @@
+import pytest
+
 from mlx_whisper_yt2srt.errors import Yt2SrtError
 from mlx_whisper_yt2srt.youtube import _extract_video_id, download_youtube_audio
 
@@ -7,6 +9,8 @@ class FakeYoutubeDL:
 
     def __init__(self, options):
         self.options = options
+        assert options["noplaylist"] is True
+        assert options["outtmpl"].endswith("youtube_%(id)s.%(ext)s")
 
     def __enter__(self):
         return self
@@ -35,12 +39,13 @@ class FakeYoutubeDL:
 
 
 def test_extract_video_id_requires_metadata():
-    try:
+    with pytest.raises(Yt2SrtError, match="metadata"):
         _extract_video_id({})
-    except Yt2SrtError as exc:
-        assert "metadata" in str(exc)
-    else:
-        raise AssertionError("expected Yt2SrtError")
+
+
+def test_extract_video_id_rejects_playlist_metadata():
+    with pytest.raises(Yt2SrtError, match="Playlist URLs are not supported"):
+        _extract_video_id({"entries": [{"id": "one"}]})
 
 
 def test_download_youtube_audio_reuses_existing_file(tmp_path):
