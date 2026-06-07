@@ -1,12 +1,22 @@
 [project]
 name = "mlx-whisper-yt2srt"
 version = "0.1.0"
-description = "Convert YouTube videos to SRT subtitle files using MLX Whisper."
+description = "Generate YouTube SRT subtitles locally on Apple Silicon using MLX Whisper."
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
 authors = [{ name = "hillfieldhonest" }]
 license = { file = "LICENSE" }
-keywords = ["mlx", "whisper", "youtube", "srt", "subtitles", "yt-dlp"]
+keywords = [
+    "apple-silicon",
+    "local",
+    "metal",
+    "mlx",
+    "srt",
+    "subtitles",
+    "whisper",
+    "youtube",
+    "yt-dlp",
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",

@@ -1,8 +1,13 @@
 # mlx_whisper_yt2srt
 
-Convert a single YouTube video URL into an SRT subtitle file using
-[MLX Whisper](https://github.com/ml-explore/mlx-examples/tree/main/whisper)
-and `yt-dlp`.
+Fast, local YouTube-to-SRT subtitle generation for Apple Silicon Macs.
+
+`mlx_whisper_yt2srt` downloads audio from a single YouTube video and generates an
+SRT subtitle file locally with
+[MLX Whisper](https://github.com/ml-explore/mlx-examples/tree/main/whisper).
+It is designed for creators, researchers, and developers who want a small,
+reproducible CLI that uses an Apple Silicon-friendly local inference stack
+instead of uploading media to a hosted transcription service.
 
 This project is intentionally small, but it is structured like a maintainable
 Python CLI: reproducible `uv` environment, package entry point, tests, linting,
@@ -11,6 +16,20 @@ and CI.
 Only YouTube video URLs are accepted. Although `yt-dlp` supports many other
 sites, this project keeps the supported input scope narrow so behavior,
 documentation, and support expectations stay clear.
+
+## Why This Tool
+
+- Apple Silicon first: MLX is built for efficient machine learning on Apple
+  silicon, and MLX Whisper lets this CLI use that stack through a simple Python
+  API.
+- Local-first workflow: audio and generated subtitles stay on your machine.
+- Narrow scope: one YouTube video in, one SRT file out.
+- Reproducible setup: `uv`, a committed lock file, CI, tests, and package entry
+  points are included.
+- Honest positioning: this project does not claim to be the fastest Whisper
+  implementation. Performance claims should be backed by reproducible
+  benchmarks because results vary by hardware, model, quantization, language,
+  timestamp settings, and cold versus warm model caches.
 
 ## Scope
 
@@ -153,6 +172,29 @@ megabytes of disk space.
   user-facing terminal output.
 - Model names are defined once in `src/mlx_whisper_yt2srt/config.py` and reused
   by the CLI.
+
+## Performance Strategy
+
+MLX Whisper is the default backend because it fits this project's current
+product shape: Python packaging, Apple Silicon, local execution, Hugging Face
+model distribution, and a small dependency surface. It is the right default for
+a focused Python CLI even though it should not be marketed as universally
+fastest without a benchmark.
+
+The project should track the Apple Silicon speech-to-text ecosystem, especially
+[MLX Whisper](https://github.com/ml-explore/mlx-examples/tree/main/whisper),
+[whisper.cpp](https://github.com/ggml-org/whisper.cpp), and
+[WhisperKit / Argmax OSS](https://github.com/argmaxinc/argmax-oss-swift).
+Backend expansion should be driven by measured results rather than speculation.
+
+A backend change or new backend option should require:
+
+- a reproducible benchmark on representative Apple Silicon hardware;
+- comparable model size, language, accuracy, and timestamp requirements;
+- a clear install and maintenance story for end users;
+- no regression to the one-command YouTube-to-SRT workflow.
+
+Until those conditions are met, the tool stays focused on MLX Whisper.
 
 ## Limitations
 
