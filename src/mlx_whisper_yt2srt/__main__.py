@@ -1,4 +1,4 @@
-from mlx_whisper_yt2srt.cli import main
+from .cli import main
 
 if __name__ == "__main__":
     raise SystemExit(main())
