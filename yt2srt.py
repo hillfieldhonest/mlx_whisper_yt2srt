@@ -2,8 +2,6 @@ import os
 import sys
 import argparse
 import subprocess
-import mlx_whisper
-from pathlib import Path
 
 def download_youtube_audio(url, format='mp3'):
     """Function to download audio from YouTube URL (using yt-dlp)"""
@@ -93,6 +91,8 @@ def generate_srt(
         if language.lower() != "auto":
             transcribe_kwargs["language"] = language
             
+        import mlx_whisper
+
         # Transcribe using MLX Whisper
         result = mlx_whisper.transcribe(audio_file, path_or_hf_repo=model_path, **transcribe_kwargs)
 
@@ -216,6 +216,7 @@ def interactive_mode(url=None, language=None, model_size=None, audio_format='mp3
         print(f"You can find it in the 'whisper_workspace' directory.")
     else:
         print("\nFailed to create SRT file. Please check the error messages above.")
+        sys.exit(1)
 
 def main():
     """Main function that handles both CLI and interactive modes"""
@@ -267,6 +268,7 @@ def main():
             print(f"You can find it in the 'whisper_workspace' directory.")
         else:
             print("Failed to create SRT file. Please check the error messages above.")
+            sys.exit(1)
 
 if __name__ == "__main__":
     main()

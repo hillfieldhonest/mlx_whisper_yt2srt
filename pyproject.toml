@@ -1,0 +1,17 @@
+[project]
+name = "mlx-whisper-yt2srt"
+version = "0.1.0"
+description = "Convert YouTube videos to SRT subtitle files using MLX Whisper."
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+license = { file = "LICENSE" }
+dependencies = [
+    "mlx-whisper>=0.4.2",
+    "yt-dlp>=2025.5.22",
+]
+
+[project.scripts]
+yt2srt = "yt2srt:main"
+
+[tool.uv]
+package = true
